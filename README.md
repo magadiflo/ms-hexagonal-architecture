@@ -4,6 +4,28 @@ Tutorial tomado de la página web de **medium** del autor **Luis Antonio**.
 
 ---
 
+## ¿Qué es la arquitectura hexagonal o patrón de puertos  y adaptadores?
+
+![01.arquitectura-hexagonal.png](./assets/01.arquitectura-hexagonal.png)
+
+> `La Arquitectura Hexagonal` propone que nuestro dominio sea el núcleo de las capas y que este no se acople a nada
+> externo. En lugar de hacer uso explícito y **mediante el principio de inversión de dependencias nos acoplamos a
+> contratos** `(interfaces o puertos)` y no a `implementaciones concretas`.
+
+`Puertos`, **definición de una interfaz pública.** Permiten comunicar cada una de las capas de la aplicación. *Por
+ejemplo, si queremos acceder a algún dato de la capa de aplicación, desde la capa de infraestructura, pues lo hacemos a
+través de un puerto.* Y entonces, **¿qué son los puertos?, en esta arquitectura serían sencillamente interfaces.**
+
+`Adaptadores`, **especialización de un puerto para un contexto concreto.** Puerta de comunicación con aplicaciones
+externas. Es decir, es cualquier cosa que tenga que ver con algo externo a nuestra aplicación, *por ejemplo: una
+conexión con base de datos, una petición a un servicio REST externo, etc.*
+Esto se realiza desde la capa de infraestructura.
+
+## Recursos
+
+Utilizaremos [JsonPlaceholder API](https://jsonplaceholder.typicode.com/) como recurso que nos ayudará a dar un ejemplo
+de cómo sería consumir una API utilizando arquitectura hexagonal.
+
 ## Dependencias
 
 ````xml
@@ -32,3 +54,30 @@ Tutorial tomado de la página web de **medium** del autor **Luis Antonio**.
     </dependency>
 </dependencies>
 ````
+
+## Referencia para la estructura del proyecto
+
+A la arquitectura hexagonal (Puertos y Adaptadores) que vamos a desarrollar la acompañaremos con
+**vertical slicing (corte vertical)**.
+Esta referencia lo podemos ver en el video siguiente **(click en la imagen)**:
+
+[![02.vertical-slicing.png](./assets/02.vertical-slicing.png)](https://www.youtube.com/watch?v=eNFAJbWCSww&feature=youtu.be)
+
+`Vertical Slicing`, es una práctica de arquitectura de software que implica organizar la estructura de directorios de un
+proyecto de manera que cada directorio represente una característica o funcionalidad completa del sistema, desde la
+interfaz de usuario hasta la capa de datos. En lugar de organizar los archivos por tipo (por ejemplo, todos los modelos
+juntos, todas las vistas juntas, etc.), el "vertical slicing" agrupa los archivos relacionados con una característica
+específica en un solo lugar.
+
+Esta práctica ayuda a mantener el código relacionado estrechamente junto y facilita la comprensión y modificación de una
+característica particular del sistema. Además, el "vertical slicing" facilita la escalabilidad del proyecto, ya que cada
+característica puede ser desarrollada, probada y desplegada de forma independiente, lo que permite un desarrollo más
+ágil y flexible.
+
+Por ejemplo, en un proyecto web de comercio electrónico, podrías tener un directorio para la autenticación de usuarios,
+otro para la gestión de productos, otro para el proceso de pago, etc. Cada directorio contendría todos los archivos
+relacionados con esa característica específica, como modelos de datos, controladores, vistas, rutas, etc. Esto hace que
+sea más fácil para los desarrolladores trabajar en una parte específica del sistema sin tener que navegar a través de
+múltiples directorios para encontrar los archivos relacionados.
+
+![03.vertical-slicing.png](./assets/03.vertical-slicing.png)
