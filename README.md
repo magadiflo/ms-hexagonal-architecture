@@ -154,3 +154,133 @@ Como vemos, nuestros puertos serían:
 
 Las implementaciones de estas `interfaces (puertos)`, es decir, los `adaptadores (implementación de interfaz)` se
 encontrarán en la capa de `infraestructura`.
+
+---
+
+# INFRASTRUCTURE
+
+---
+
+Si recordamos, en el paquete `domain` definimos los **puertos**: `PostCommandRepository` y `PostQueryRepository`. Ahora,
+en esta capa de **infrastructure** añadiremos la implementación de dichos **puertos (interfaces)**, es decir
+construiremos los `adaptadores (implementación de puertos)`.
+
+Entonces, nuevamente **¿quiénes son los adaptadores?**, pues los adaptadores serían las clases concretas o
+implementaciones de nuestras interfaces definidas en la capa de **Domain**.
+
+## Adaptador - PostCommandRepositoryImpl
+
+La implementación concreta (adaptador) de la interfaz (puerto) `PostCommandRepository` sería el siguiente:
+
+````java
+
+@RequiredArgsConstructor
+@Repository
+public class PostCommandRepositoryImpl implements PostCommandRepository {
+
+    private final JsonPlaceholderAPIClient jsonPlaceholderAPIClient;
+
+    @Override
+    public Optional<PostQuery> createPost(PostCommand postCommand) {
+        return Optional.ofNullable(this.jsonPlaceholderAPIClient.createPost(postCommand));
+    }
+
+    @Override
+    public Optional<PostQuery> updatePost(PostCommand postCommand, Long postId) {
+        return Optional.ofNullable(this.jsonPlaceholderAPIClient.updatePost(postCommand, postId));
+    }
+
+    @Override
+    public void deletePost(Long id) {
+        this.jsonPlaceholderAPIClient.deletePost(id);
+    }
+}
+````
+
+## Adaptador - PostQueryRepositoryImpl
+
+La implementación concreta (adaptador) de la interfaz (puerto) `PostQueryRepository` sería el siguiente:
+
+````java
+
+@RequiredArgsConstructor
+@Repository
+public class PostQueryRepositoryImpl implements PostQueryRepository {
+
+    private final JsonPlaceholderAPIClient placeholderAPIClient;
+
+    @Override
+    public List<PostQuery> findAllPosts() {
+        return this.placeholderAPIClient.getAllPosts();
+    }
+
+    @Override
+    public Optional<PostQuery> findPostById(Long id) {
+        return Optional.ofNullable(this.placeholderAPIClient.findPostById(id));
+    }
+
+    @Override
+    public List<PostQuery> searchPostsByParams(Map<String, String> params) {
+        return this.placeholderAPIClient.searchPostByParam(params);
+    }
+}
+````
+
+## Consumiendo JsonPlaceholderAPI
+
+Ambas implementaciones están usando la interfaz `JsonPlaceholderAPIClient` quien es usado como un `cliente HTTP`, dado
+que estamos usando anotaciones de `@FeignClient`. En otras palabras, vamos a consumir un api externa y para eso
+utilizamos de entre las múltiples opciones, la opción de usar `feign client`.
+
+`Feign Client` es una herramienta en Spring Boot que permite a los desarrolladores definir interfaces Java para
+comunicarse con otros servicios HTTP de manera declarativa y simplificada.
+
+En lugar de escribir manualmente el código para realizar solicitudes HTTP utilizando bibliotecas
+como `RestTemplate`, `WebClient` o `RestClient`, `Feign Client` **permite definir interfaces con anotaciones que
+describen las solicitudes que se realizarán, incluidos los métodos, las URL y los parámetros de solicitud.** Luego,
+Spring Boot se encarga de generar automáticamente la implementación de estas interfaces, lo que simplifica
+significativamente el código y reduce la carga de trabajo del desarrollador.
+
+````java
+
+@FeignClient(name = "jsonplaceholder", url = "https://jsonplaceholder.typicode.com", path = "/posts")
+public interface JsonPlaceholderAPIClient {
+    @GetMapping
+    List<PostQuery> getAllPosts();
+
+    @GetMapping
+    List<PostQuery> searchPostByParam(@RequestParam Map<String, String> params);
+
+    @GetMapping(path = "/{id}")
+    PostQuery findPostById(@PathVariable Long id);
+
+    @PostMapping
+    PostQuery createPost(@RequestBody PostCommand postCommand);
+
+    @PutMapping(path = "/{id}")
+    PostQuery updatePost(@RequestBody PostCommand postCommand, @PathVariable Long id);
+
+    @DeleteMapping(path = "/{id}")
+    void deletePost(@PathVariable Long id);
+}
+````
+
+Para que nuestra interfaz anotada con `@FeignClient` funcione, necesitamos agregar en la clase principal de la
+aplicación la anotación `@EnableFeignClients`:
+
+````java
+
+@EnableFeignClients
+@SpringBootApplication
+public class HexagonalApplication {
+    /* code */
+}
+````
+
+También tenemos nuestra carpeta `database` en este caso yo no lo estoy utilizando para el ejemplo, pero prácticamente
+allí iría nuestra interface que en el MVC llamamos el `@Repository`, por ejemplo.
+
+````java
+public interface PostMySqlRepository extends JpaRepository<PostEntity, Long> {
+}
+````

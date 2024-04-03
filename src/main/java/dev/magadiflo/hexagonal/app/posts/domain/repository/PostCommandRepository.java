@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface PostCommandRepository {
     Optional<PostQuery> createPost(PostCommand postCommand);
 
-    Optional<PostQuery> updatePost(PostCommand postCommand);
+    Optional<PostQuery> updatePost(PostCommand postCommand, Long postId);
 
     void deletePost(Long id);
 }
