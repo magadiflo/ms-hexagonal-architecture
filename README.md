@@ -81,3 +81,76 @@ sea más fácil para los desarrolladores trabajar en una parte específica del s
 múltiples directorios para encontrar los archivos relacionados.
 
 ![03.vertical-slicing.png](./assets/03.vertical-slicing.png)
+
+---
+
+# DOMAIN
+
+---
+
+En esta sección implementaremos la capa de `dominio`, donde vamos a definir nuestros modelos y los repositorios.
+
+## Domain - Modelos
+
+La siguiente clase define únicamente los atributos necesarios para nuestro `Post` para poder realizar operaciones
+como `inserción`, `actualización` o `eliminación`:
+
+````java
+
+@Getter
+@Builder
+public class PostCommand {
+    private Long userId;
+    private String body;
+    private String title;
+}
+````
+
+En esta otra clase se definen todos los atributos, incluidos el `id` del `Post`, dado que se usará esta clase para
+poder recuperar información del post. A diferencia de la clase anterior, esta clase representa la información que
+vamos a recuperar, mientras que la clase anterior, representa la información que se va a persistir.
+
+````java
+
+@AllArgsConstructor
+@Getter
+public class PostQuery {
+    private Long id;
+    private Long userId;
+    private String body;
+    private String title;
+}
+````
+
+## Domain - Repositorios
+
+A continuación se muestra la definición de los `puertos (interfaces)`, que más adelante los usaremos para poder
+realizar inyección de dependencias.
+
+````java
+public interface PostCommandRepository {
+    Optional<PostQuery> createPost(PostCommand postCommand);
+
+    Optional<PostQuery> updatePost(PostCommand postCommand);
+
+    void deletePost(Long id);
+}
+````
+
+````java
+public interface PostQueryRepository {
+    List<PostQuery> findAllPosts();
+
+    Optional<PostQuery> findPostById(Long id);
+
+    List<PostQuery> searchPostsByParams(Map<String, String> params);
+}
+````
+
+Como vemos, nuestros puertos serían:
+
+- `PostCommandRepository`
+- `PostQueryRepository`
+
+Las implementaciones de estas `interfaces (puertos)`, es decir, los `adaptadores (implementación de interfaz)` se
+encontrarán en la capa de `infraestructura`.
