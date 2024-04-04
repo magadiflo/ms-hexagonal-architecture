@@ -391,3 +391,57 @@ allí iría nuestra interface que en el MVC llamamos el `@Repository`, por ejemp
 public interface PostMySqlRepository extends JpaRepository<PostEntity, Long> {
 }
 ````
+
+## Controladores
+
+Ahora nos falta poder usar nuestros casos de uso en nuestros controladores, para eso crearemos la clase `PostController`
+dentro del paquete **infrastructure**.
+
+Recordar que como los casos de uso son implementaciones de los puertos definidos en el paquete `service` de `domain`,
+es que en los controladores usaremos dichos puertos, para que puedan ser inyectados en tiempo de ejecución las clases
+concretas o implementadas de dichos puertos.
+
+````java
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(path = "/api/v1/posts")
+public class PostController {
+
+    private final PostFindUseCasePort postFindUseCasePort;
+    private final PostCreateUseCasePort postCreateUseCasePort;
+
+    @GetMapping
+    public ResponseEntity<List<PostQuery>> findAllPosts() {
+        return ResponseEntity.ok(this.postFindUseCasePort.findAllPosts());
+    }
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<PostQuery> findPostById(@PathVariable Long id) {
+        return ResponseEntity.ok(this.postFindUseCasePort.findPostById(id));
+    }
+
+    @GetMapping(path = "/user/{userId}")
+    public ResponseEntity<List<PostQuery>> findAllPostsByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(this.postFindUseCasePort.findAllPostsByUserId(userId));
+    }
+
+    @PostMapping
+    public ResponseEntity<PostQuery> savePosts(@RequestBody PostCommand postCommand) {
+        PostQuery postDB = this.postCreateUseCasePort.createPost(postCommand);
+        URI uri = URI.create("/api/v1/posts/" + postDB.getId());
+        return ResponseEntity.created(uri).body(postDB);
+    }
+
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<PostQuery> updatePost(@RequestBody PostCommand postCommand, @PathVariable Long id) {
+        return ResponseEntity.ok(this.postCreateUseCasePort.updatePost(postCommand, id));
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+        this.postCreateUseCasePort.deletePost(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+````
