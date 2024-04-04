@@ -445,3 +445,106 @@ public class PostController {
     }
 }
 ````
+
+## Ejecutando aplicación
+
+````bash
+$ curl -v http://localhost:8080/api/v1/posts | jq
+
+< HTTP/1.1 200
+<
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+    "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+  },
+  {...},
+  {
+    "id": 99,
+    "userId": 10,
+    "body": "quo deleniti praesentium dicta non quod\naut est molestias\nmolestias et officia quis nihil\nitaque dolorem quia",
+    "title": "temporibus sit alias delectus eligendi possimus magni"
+  },
+  {
+    "id": 100,
+    "userId": 10,
+    "body": "cupiditate quo est a modi nesciunt soluta\nipsa voluptas error itaque dicta in\nautem qui minus magnam et distinctio eum\naccusamus ratione error aut",
+    "title": "at nam consequatur ea labore ea harum"
+  }
+]
+````
+
+````bash
+$ curl -v http://localhost:8080/api/v1/posts/3 | jq
+
+< HTTP/1.1 200
+<
+{
+  "id": 3,
+  "userId": 1,
+  "body": "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut",
+  "title": "ea molestias quasi exercitationem repellat qui ipsa sit aut"
+}
+````
+
+````bash
+$ curl -v http://localhost:8080/api/v1/posts/user/3 | jq
+
+< HTTP/1.1 200
+<
+[
+  {
+    "id": 21,
+    "userId": 3,
+    "body": "repellat aliquid praesentium dolorem quo\nsed totam minus non itaque\nnihil labore molestiae sunt dolor eveniet hic recusandae veniam\ntempora et tenetur expedita sunt",
+    "title": "asperiores ea ipsam voluptatibus modi minima quia sint"
+  },
+  {...},
+  {
+    "id": 29,
+    "userId": 3,
+    "body": "odit magnam ut saepe sed non qui\ntempora atque nihil\naccusamus illum doloribus illo dolor\neligendi repudiandae odit magni similique sed cum maiores",
+    "title": "iusto eius quod necessitatibus culpa ea"
+  },
+  {
+    "id": 30,
+    "userId": 3,
+    "body": "alias dolor cumque\nimpedit blanditiis non eveniet odio maxime\nblanditiis amet eius quis tempora quia autem rem\na provident perspiciatis quia",
+    "title": "a quo magni similique perferendis"
+  }
+]
+````
+
+````bash
+$ curl -v -X POST -H "Content-Type: application/json" -d "{\"userId\": 1, \"body\": \"mi nuevo post\", \"title\": \"post inedito\"}" http://localhost:8080/api/v1/posts | jq
+
+< HTTP/1.1 201
+<
+{
+  "id": 101,
+  "userId": 1,
+  "body": "mi nuevo post",
+  "title": "post inedito"
+}
+````
+
+````bash
+$ curl -v -X PUT -H "Content-Type: application/json" -d "{\"userId\": 1, \"body\": \"mi nuevo post - UPDATE\", \"title\": \"post inedito - UPDATE\"}" http://localhost:8080/api/v1/posts/2 | jq
+
+< HTTP/1.1 200
+<
+{
+  "id": 2,
+  "userId": 1,
+  "body": "mi nuevo post - UPDATE",
+  "title": "post inedito - UPDATE"
+}
+````
+
+````bash
+$ curl -v -X DELETE http://localhost:8080/api/v1/posts/2 | jq
+
+< HTTP/1.1 204
+````
