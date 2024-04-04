@@ -82,6 +82,13 @@ múltiples directorios para encontrar los archivos relacionados.
 
 ![03.vertical-slicing.png](./assets/03.vertical-slicing.png)
 
+## Diagrama de clases
+
+A continuación de muestra el diagrama de clases que representa la arquitectura hexagonal que desarrollaremos en este
+tutorial.
+
+![04.class-diagram.bmp](./assets/04.class-diagram.bmp)
+
 ---
 
 # DOMAIN
