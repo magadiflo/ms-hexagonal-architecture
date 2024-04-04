@@ -155,6 +155,113 @@ Como vemos, nuestros puertos serían:
 Las implementaciones de estas `interfaces (puertos)`, es decir, los `adaptadores (implementación de interfaz)` se
 encontrarán en la capa de `infraestructura`.
 
+## Domain - Servicios
+
+A continuación se definen los puertos que serán implementados posteriormente en la capa de aplicación, es decir,
+en la capa de aplicación crearemos los **adaptadores** de estos puertos:
+
+````java
+public interface PostCreateUseCasePort {
+    PostQuery createPost(PostCommand postCommand);
+
+    PostQuery updatePost(PostCommand postCommand, Long id);
+
+    void deletePost(Long id);
+}
+````
+
+````java
+public interface PostFindUseCasePort {
+    List<PostQuery> findAllPosts();
+
+    List<PostQuery> findAllPostsByUserId(Long userId);
+
+    PostQuery findPostById(Long id);
+}
+````
+
+Recordemos que un **adaptador** es una clase concreta o implementación de nuestros **puertos (interfaces)**, en ese
+sentido, observemos que en esta capa de **domain** hemos creado 2 tipos de puerto:
+
+- Puertos de la carpeta `repository` de la capa `domain`, que su implementación se encuentra en la
+  capa `infrastructure`.
+- Puertos de la carpeta `service` de la capa `domain`, que su implementación se encuentra en la capa de `application`.
+
+Así es, **los puertos de los casos de uso se encuentra dentro del package `service` de domain**, quiere decir que,
+realizaremos la inyección de dependencias a través de estos puertos.
+
+---
+
+# APPLICATION
+
+---
+
+En esta capa `application` crearemos los casos de uso de nuestra aplicación que vendrían a ser implementaciones
+(adapter) de las interfaces (ports) definidos en el `service` de `domain`:
+
+````java
+
+@RequiredArgsConstructor
+@Service
+public class PostCreateUseCase implements PostCreateUseCasePort {
+
+    private final PostCommandRepository postCommandRepository;
+
+    @Override
+    public PostQuery createPost(PostCommand postCommand) {
+        return this.postCommandRepository.createPost(postCommand)
+                .orElseThrow(() -> new NoSuchElementException("No se retornó Post"));
+    }
+
+    @Override
+    public PostQuery updatePost(PostCommand postCommand, Long id) {
+        return this.postCommandRepository.updatePost(postCommand, id)
+                .orElseThrow(() -> new NoSuchElementException("Ocurrió un error al actualizar"));
+    }
+
+    @Override
+    public void deletePost(Long id) {
+        this.postCommandRepository.deletePost(id);
+    }
+}
+````
+
+````java
+
+@RequiredArgsConstructor
+@Service
+public class PostFindUseCase implements PostFindUseCasePort {
+
+    private final PostQueryRepository postQueryRepository;
+
+    @Override
+    public List<PostQuery> findAllPosts() {
+        return this.postQueryRepository.findAllPosts();
+    }
+
+    @Override
+    public List<PostQuery> findAllPostsByUserId(Long userId) {
+        return this.postQueryRepository.searchPostsByParams(Map.of("userId", String.valueOf(userId)));
+    }
+
+    @Override
+    public PostQuery findPostById(Long id) {
+        return this.postQueryRepository.findPostById(id)
+                .orElseThrow(() -> new NoSuchElementException("No se encontró el post con id:" + id));
+    }
+}
+````
+
+Como nuestros casos de uso se encuentran en la capa de `application`, significa que sólo deben tener importaciones del
+package `domain`, y **aquí es donde utilizaremos el patrón de Inyección de dependencias** por constructor, utilizando
+la anotación `@RequiredArgsConstructor` de Lombok.
+
+Por ejemplo, para acceder a nuestro adaptador `PostQueryRepositoryImpl` (que está en la capa infrastructure), utilizamos
+la inyección de dependencias y accedemos a él a través de nuestro puerto `PostQueryRepository`. Deben recordar que:
+
+- **La capa de `application` sólo debe conocer a domain**, y accede a infrastructure a través de la inyección de
+  dependencias, y así estamos cumpliendo con nuestra Arquitectura Hexagonal como en la gráfica inicial.
+
 ---
 
 # INFRASTRUCTURE
